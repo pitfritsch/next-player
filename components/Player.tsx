@@ -12,6 +12,25 @@ const ButtonsContainer = styled("div", {
   display: "flex",
   gap: "10px",
   justifyContent: "center",
+  alignItems: "center",
+  "&>button": {
+    backgroundColor: "#3e3e3e",
+    display: "flex",
+    alignItems: "center",
+    borderRadius: "100px",
+    border: "none",
+    padding: "10px",
+    cursor: "pointer",
+    transition: "150ms",
+
+    "&:hover, &:focus": {
+      transform: "scale(1.1)",
+    },
+
+    "&:active": {
+      transform: "scale(1.05)",
+    },
+  },
 });
 
 const Slider = styled("input", {
@@ -19,7 +38,14 @@ const Slider = styled("input", {
   maxWidth: "500px",
 });
 
-// const
+const Timers = styled("div", {
+  display: "flex",
+  justifyContent: "space-between",
+  padding: "0 10px",
+  "&>span": {
+    fontSize: "12px",
+  },
+});
 
 interface PlayerProps {
   source: string;
@@ -38,13 +64,17 @@ function Controller({ duration, audioRef }: ControllerProps) {
   const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
-    setInterval(() => setCurrentTime(audioRef.current?.currentTime || 0), 1000);
+    const interval = setInterval(() => setCurrentTime(audioRef.current?.currentTime || 0), 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  const changeTime = useCallback((newTime: number) => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = newTime;
-  }, []);
+  const changeTime = useCallback(
+    (newTime: number) => {
+      if (!audioRef.current) return;
+      audioRef.current.currentTime = newTime;
+    },
+    [audioRef.current]
+  );
 
   return (
     <>
@@ -56,8 +86,10 @@ function Controller({ duration, audioRef }: ControllerProps) {
         value={currentTime}
         onChange={(e) => changeTime(Number(e.target.value))}
       />
-      <span>{convertSecondsToReadable(currentTime)}</span>
-      <span>{convertSecondsToReadable(duration || 0)}</span>
+      <Timers>
+        <span>{convertSecondsToReadable(currentTime)}</span>
+        <span>{convertSecondsToReadable(duration || 0)}</span>
+      </Timers>
     </>
   );
 }
