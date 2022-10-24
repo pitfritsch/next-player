@@ -48,7 +48,7 @@ const Timers = styled("div", {
 });
 
 interface PlayerProps {
-  source: string;
+  audio: HTMLAudioElement | null;
 }
 
 interface ControllerProps {
@@ -88,16 +88,16 @@ function Controller({ duration, audioRef }: ControllerProps) {
       />
       <Timers>
         <span>{convertSecondsToReadable(currentTime)}</span>
-        <span>{convertSecondsToReadable(duration || 0)}</span>
+        {!!duration && <span>{convertSecondsToReadable(duration || 0)}</span>}
       </Timers>
     </>
   );
 }
 
-export default function Player({ source }: PlayerProps) {
+export default function Player({ audio }: PlayerProps) {
   const { isBrowser } = useSsr();
 
-  const audioRef = useRef(isBrowser ? new Audio(source) : null);
+  const audioRef = useRef<HTMLAudioElement | null>(audio);
 
   const { duration = 0 } = audioRef.current || {};
 
@@ -127,15 +127,16 @@ export default function Player({ source }: PlayerProps) {
   }
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.onplay = () => setIsPlaying(true);
-      audioRef.current.onpause = () => setIsPlaying(false);
-    }
-  }, [audioRef.current]);
+    if (!audio) return;
+
+    audio.onplay = () => setIsPlaying(true);
+    audio.onpause = () => setIsPlaying(false);
+    audioRef.current = audio;
+  }, [audio]);
 
   return (
     <PlayerContainer>
-      <Controller duration={duration || 0} audioRef={audioRef} />
+      {audioRef.current && <Controller duration={duration} audioRef={audioRef} />}
       <ButtonsContainer>
         <button onClick={goBack}>
           <RotateCcw size={14} />
