@@ -25,6 +25,7 @@ const InputGroup = styled("div", {
   },
   "&>input": {
     padding: "5px 10px",
+    minWidth: "500px",
   },
 });
 

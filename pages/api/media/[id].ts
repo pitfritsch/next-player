@@ -8,18 +8,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
   const protocol = isHttps ? https : http;
 
   return new Promise((resolve) => {
-    console.log(`aqui`, source);
     try {
+      const { host, ...otherHeaders } = req.headers;
       protocol.get(
         source,
         {
           headers: {
-            ...req.headers,
+            ...otherHeaders,
             referer: source,
           },
         },
         function (response) {
-          console.log(response.statusCode);
           const newHeaders = { ...response.headers };
           if (newHeaders.location)
             newHeaders.location = `/api/media/${Buffer.from(newHeaders.location, "utf-8").toString(
@@ -32,7 +31,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
         }
       );
     } catch (error) {
-      console.log(`deu erro aqui`);
+      console.log(`catch`, error);
     }
   }).catch((e) => {
     console.log(e);
