@@ -11,9 +11,6 @@ export const MainContainer = styled("div", {
   placeContent: "center",
   gap: "20px",
 });
-const url = "http://archive.org/serve/lady-frankenstein_202210/Lady%20Frankenstein.mp3";
-// const url =
-//   "https://portal.sacocheio.tv/programacao/uploads/4/ntuefvu4pp1/cacb796c58e06df0b058be630f9809ca.mp3";
 
 const InputGroup = styled("div", {
   display: "flex",
@@ -31,7 +28,7 @@ const InputGroup = styled("div", {
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const [source, setSource] = useState<string>(url);
+  const [source, setSource] = useState<string>("");
   const [audios, setAudios] = useStorage<{ id: string; source: string }[]>(
     "audios",
     [],
