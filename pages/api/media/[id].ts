@@ -10,14 +10,23 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
 
   return new Promise((resolve) => {
     try {
-      const { host, ...otherHeaders } = req.headers;
+      // const { host, accept, "accept-encoding", "accept-language",  } = req.headers;
       const newHeaders = {
-        ...otherHeaders,
+        connection: req.headers["connection"],
+        "user-agent": req.headers["user-agent"],
+        "accept-encoding": req.headers["accept-encoding"],
+        accept: req.headers["accept"],
+        "sec-gpc": req.headers["sec-gpc"],
+        "accept-language": req.headers["accept-language"],
+        "sec-fetch-site": req.headers["sec-fetch-site"],
+        "sec-fetch-mode": req.headers["sec-fetch-mode"],
+        "sec-fetch-dest": req.headers["sec-fetch-dest"],
+        range: req.headers["range"],
         referer: source,
       };
-      res.status(200).send(newHeaders);
-      return;
-      console.log({ source, newHeaders });
+      // res.status(200).send(newHeaders);
+      // return;
+      // console.log({ source, newHeaders });
       protocol.get(
         source,
         {
