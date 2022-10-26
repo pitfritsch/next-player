@@ -3,7 +3,9 @@ import https from "https";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<any>) {
-  const source = Buffer.from(String(req.query.id), "base64").toString("utf-8").trim();
+  const rawQueryId = String(req.query.id);
+  const queryId = rawQueryId.replace(/_/g, "/");
+  const source = Buffer.from(queryId, "base64").toString("utf-8").trim();
 
   const isHttps = source.startsWith("https");
   const protocol = isHttps ? https : http;
@@ -11,6 +13,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
   return new Promise((resolve, reject) => {
     try {
       // const { host, accept, "accept-encoding", "accept-language",  } = req.headers;
+
       const rawHeaders = {
         connection: req.headers["connection"],
         "user-agent": req.headers["user-agent"],
@@ -24,6 +27,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
         range: req.headers["range"],
         referer: source,
       };
+
       const newHeaders = Object.fromEntries(
         Object.entries(rawHeaders).filter(([key, value]) => !!value)
       );
@@ -38,11 +42,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
         function (response) {
           try {
             const newHeaders = { ...response.headers };
-            if (newHeaders.location)
-              newHeaders.location = `/api/media/${Buffer.from(
-                newHeaders.location,
-                "utf-8"
-              ).toString("base64")}`;
+            if (newHeaders.location) {
+              const locationBase64 = Buffer.from(newHeaders.location, "utf-8").toString("base64");
+              newHeaders.location = `/api/media/${locationBase64.replace(/\//, "_")}`;
+            }
             res.writeHead(response.statusCode || 400, response.statusMessage, newHeaders);
             response.pipe(res);
             // response.on("end", res)
