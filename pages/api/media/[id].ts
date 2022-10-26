@@ -11,7 +11,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
   return new Promise((resolve) => {
     try {
       // const { host, accept, "accept-encoding", "accept-language",  } = req.headers;
-      const newHeaders = {
+      const rawHeaders = {
         connection: req.headers["connection"],
         "user-agent": req.headers["user-agent"],
         "accept-encoding": req.headers["accept-encoding"],
@@ -24,6 +24,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
         range: req.headers["range"],
         referer: source,
       };
+      const newHeaders = Object.fromEntries(
+        Object.entries(rawHeaders).filter(([key, value]) => !!value)
+      );
       // res.status(200).send(newHeaders);
       // return;
       // console.log({ source, newHeaders });
