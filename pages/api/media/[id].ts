@@ -2,6 +2,18 @@ import http from "http";
 import https from "https";
 import { NextApiRequest, NextApiResponse } from "next";
 
+function handleRange(range: string) {
+  if (!range) return range;
+  const originalRange = range.split("=")[1].split("-");
+  const from = Number(originalRange[0]);
+  const to = Number(originalRange[1]);
+  if (isNaN(to) || to - from > 5000000 || !to) {
+    return `bytes=${from}-${from + 5000000}`;
+  } else {
+    return range;
+  }
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const rawQueryId = String(req.query.id);
   const queryId = rawQueryId.replace(/_/g, "/");
@@ -12,8 +24,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
 
   return new Promise((resolve, reject) => {
     try {
-      // const { host, accept, "accept-encoding", "accept-language",  } = req.headers;
-
       const rawHeaders = {
         connection: req.headers["connection"],
         "user-agent": req.headers["user-agent"],
@@ -24,16 +34,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
         "sec-fetch-site": req.headers["sec-fetch-site"],
         "sec-fetch-mode": req.headers["sec-fetch-mode"],
         "sec-fetch-dest": req.headers["sec-fetch-dest"],
-        range: req.headers["range"],
+        range: handleRange(req.headers["range"] || ""),
         referer: source,
       };
 
       const newHeaders = Object.fromEntries(
         Object.entries(rawHeaders).filter(([key, value]) => !!value)
       );
-      // res.status(200).send(newHeaders);
-      // return;
-      // console.log({ source, newHeaders });
+
       protocol
         .get(
           source,
@@ -47,6 +55,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
                 const locationBase64 = Buffer.from(newHeaders.location, "utf-8").toString("base64");
                 newHeaders.location = `/api/media/${locationBase64.replace(/\//, "_")}`;
               }
+              newHeaders.range = handleRange(newHeaders.range || "");
+              console.log({ newHeaders, first: false });
               res.writeHead(response.statusCode || 400, response.statusMessage, newHeaders);
               response.pipe(res);
               // response.on("end", res)
