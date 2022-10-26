@@ -56,7 +56,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
                 newHeaders.location = `/api/media/${locationBase64.replace(/\//, "_")}`;
               }
               newHeaders.range = handleRange(newHeaders.range || "");
-              console.log({ newHeaders, first: false });
               res.writeHead(response.statusCode || 400, response.statusMessage, newHeaders);
               response.pipe(res);
               // response.on("end", res)
