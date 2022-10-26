@@ -4,19 +4,24 @@ import https from "https";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const source = Buffer.from(String(req.query.id), "base64").toString("utf-8").trim();
+
   const isHttps = source.startsWith("https");
   const protocol = isHttps ? https : http;
 
   return new Promise((resolve) => {
     try {
       const { host, ...otherHeaders } = req.headers;
+      const newHeaders = {
+        ...otherHeaders,
+        referer: source,
+      };
+      res.status(200).send(newHeaders);
+      return;
+      console.log({ source, newHeaders });
       protocol.get(
         source,
         {
-          headers: {
-            ...otherHeaders,
-            referer: source,
-          },
+          headers: newHeaders,
         },
         function (response) {
           const newHeaders = { ...response.headers };
@@ -30,11 +35,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
           resolve(0);
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       console.log(`catch`, error);
+      res.status(400).send({ message: error.message, error });
     }
   }).catch((e) => {
     console.log(e);
-    res.status(500).send({ message: e.message });
+    res.status(400).send({ message: e.message, error: e });
   });
 }

@@ -21,7 +21,11 @@ export default function PlayerPage() {
     const data = audios.find((audio) => audio.id === id);
     if (!data) return console.log("nao achou");
 
-    setAudio(new Audio(`/api/media/${btoa(data.source)}`));
+    try {
+      setAudio(new Audio(`/api/media/${btoa(data.source)}`));
+    } catch (error) {
+      console.log(error);
+    }
   }, [id]);
 
   useEffect(() => {
