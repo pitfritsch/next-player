@@ -34,27 +34,32 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<any>) 
       // res.status(200).send(newHeaders);
       // return;
       // console.log({ source, newHeaders });
-      protocol.get(
-        source,
-        {
-          headers: newHeaders,
-        },
-        function (response) {
-          try {
-            const newHeaders = { ...response.headers };
-            if (newHeaders.location) {
-              const locationBase64 = Buffer.from(newHeaders.location, "utf-8").toString("base64");
-              newHeaders.location = `/api/media/${locationBase64.replace(/\//, "_")}`;
+      protocol
+        .get(
+          source,
+          {
+            headers: newHeaders,
+          },
+          function (response) {
+            try {
+              const newHeaders = { ...response.headers };
+              if (newHeaders.location) {
+                const locationBase64 = Buffer.from(newHeaders.location, "utf-8").toString("base64");
+                newHeaders.location = `/api/media/${locationBase64.replace(/\//, "_")}`;
+              }
+              res.writeHead(response.statusCode || 400, response.statusMessage, newHeaders);
+              response.pipe(res);
+              // response.on("end", res)
+              resolve(0);
+            } catch (error) {
+              response.resume();
+              reject(error);
             }
-            res.writeHead(response.statusCode || 400, response.statusMessage, newHeaders);
-            response.pipe(res);
-            // response.on("end", res)
-            resolve(0);
-          } catch (error) {
-            reject(error);
           }
-        }
-      );
+        )
+        .on("error", (e) => {
+          reject(e);
+        });
     } catch (error: any) {
       reject(error);
     }

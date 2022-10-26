@@ -22,7 +22,7 @@ export default function PlayerPage() {
     if (!data) return console.log("nao achou");
 
     try {
-      setAudio(new Audio(`/api/media/${btoa(data.source)}`));
+      setAudio(new Audio(`/api/media/${btoa(data.source).replaceAll("/", "_")}`));
     } catch (error) {
       console.log(error);
     }
