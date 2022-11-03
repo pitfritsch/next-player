@@ -7,8 +7,8 @@ function handleRange(range: string) {
   const originalRange = range.split("=")[1].split("-");
   const from = Number(originalRange[0]);
   const to = Number(originalRange[1]);
-  if (isNaN(to) || to - from > 5000000 || !to) {
-    return `bytes=${from}-${from + 5000000}`;
+  if (isNaN(to) || to - from > 2000000 || !to) {
+    return `bytes=${from}-${from + 2000000}`;
   } else {
     return range;
   }
